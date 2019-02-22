@@ -1,33 +1,32 @@
 import sqlite3
+import pandas as pd
 
-#In memory db ':memory:''; lives in RAM; useful for testing b/c fresh start each time
-connection = sqlite3.connect('rankulator.db')
+#In memory db ':memory:; lives in RAM; useful for testing b/c fresh start each time
+#connection = sqlite3.connect('rankulator.db')
+connection = sqlite3.connect(':memory:')
 
 c = connection.cursor()
 
 #3 quotes allow for multiline stuff
-# c.execute("""CREATE TABLE stats (
-#             teams text, # I messed up and made it plural
-#             successful_passes integer,
-#             total_passes integer,
-#             passing_yards integer,
-#             successful_runs integer,
-#             total_runs integer,
-#             rushing_yards integer
-#             )""")
+c.execute("""CREATE TABLE stats (
+             team text,
+             week integer,
+             num_plays integer
+             )""")
 
 #functions for application integration
-def insert_team_data(obj):
+def insert_team_data(csvfile):
     # Use connection as a context manager:
     # -This helps with rollback, setup, teardown, etc
     # -Makes it so a commit statement is not needed after every insert
     with connection:
         # Inserts data
-        c.execute("INSERT INTO stats VALUES (:teams, ..., :rushing_yards)", ('teams': obj.value, ..., 'rushing_yards': obj.value))
+        df = pd.read_csv(csvfile)
+        df.to_sql('stats', connection, if_exists='append', index=False)
 
 def get_team_by_name(team_name):
     # No Context manager b/c select doesn't need to be commited
-    c.execute("SELECT * FROM stats WHERE teams=:teams", {'teams': team_name})
+    c.execute("SELECT * FROM stats WHERE team=:team", {'team': team_name})
     return c.fetchall()
 
 # Hard coded
@@ -38,14 +37,18 @@ def get_team_by_name(team_name):
 # c.execute("INSERT INTO stats VALUES (?,?,?,?,?,?,?)", (tuple of values))
 # c.execute("INSERT INTO stats VALUES (:teams, ..., :rushing_yards)", ('teams': value, ..., 'rushing_yards': value))
 
-c.execute("SELECT * FROM stats WHERE teams='TestTeam'")
+#c.execute("SELECT * FROM stats WHERE teams='Florida'")
 
-# c.fetchone(), c.fetchmany(numer of rows to fetch), c.fetchall()
+# c.fetchone(), c.fetchmany(number of rows to fetch), c.fetchall()
 # use after each select statement to use selected data (I think)
-print(c.fetchone())
+#print(c.fetchone())
 
 #finishes transaction
-connection.commit()
+#connection.commit()
+
+insert_team_data('test.csv')
+out = get_team_by_name('Florida')
+print(out)
 
 connection.close()
 
