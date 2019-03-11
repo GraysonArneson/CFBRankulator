@@ -94,4 +94,4 @@ for team in teams:
     print("---------------------------------------------------------------------------------------")
 
 #Convert dataframe to csv
-#df.to_csv('results.csv')
+df.to_csv('results.csv')
