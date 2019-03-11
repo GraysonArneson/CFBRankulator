@@ -10,12 +10,12 @@ d = {
   59 : 2.580, 60 : 2.620, 61 : 2.712, 62 : 2.815, 63 : 2.880, 64 : 2.924, 65 : 3.061, 66 : 3.088, 67 : 3.150, 68 : 3.226, 69 : 3.301,
   70 : 3.334, 71 : 3.409, 72 : 3.491, 73 : 3.572, 74 : 3.645, 75 : 3.706, 76 : 3.782, 77 : 3.826, 78 : 3.842, 79 : 3.887, 80 : 3.898,
   81 : 3.976, 82 : 4.031, 83 : 4.065, 84 : 4.134, 85 : 4.253, 86 : 4.280, 87 : 4.313, 88 : 4.340, 89 : 4.382, 90 : 4.411, 91 : 4.457,
-  92 : 4.576, 93 : 4.752, 94 : 4.854, 95 : 4.993, 96 : 5.201, 97 : 5.394, 98 : 5.484, 99 : 5.625, 100 : 6.963, 136:7
+  92 : 4.576, 93 : 4.752, 94 : 4.854, 95 : 4.993, 96 : 5.201, 97 : 5.394, 98 : 5.484, 99 : 5.625, 100 : 6.963
 }
 #Call API for week 6 Florida game
 weeks = ["6"]
 # weeks = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
-teams = ["Florida"]
+teams = ["Alabama"]
 # teams = ["Florida", "LSU", "Florida State", "Alabama"]
 # SEC = ["Florida", "LSU", "Texas A&M", "Alabama", "Arkansas", "Auburn", "Georgia", "Kentucky", "Mississippi State", "Missouri", "Ole Miss", "South Carolina", "Tennessee", "Vanderbilt"]
 # ACC = ["Florida State", "Boston College", "Clemson", "Duke", "Georgia Tech", "Louisville", "Miami", "NC State", "Pittsburgh", "Syracuse", "Virginia", "Virginia Tech", "Wake Forest"]
@@ -29,6 +29,17 @@ teams = ["Florida"]
 # teams.extend(B12)
 
 #Make API call
+
+weekNum = [6, 6, 6, 6]
+teamName = ["Florida", "Miami", "Georgia", "NC State"]
+numRush = []
+succRush = []
+numPass = []
+succPass = []
+succPct = []
+numPlays = []
+PointsPerPlay = []
+
 response = requests.get("https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=6")
 
 #Check for appropriate response code
@@ -39,6 +50,8 @@ print("Expected status code: 200")
 df = pd.read_json(response.content)
 df.sort_values(by=['period'])
 
+
+toSkip = ["Kickoff", "Punt", "Penalty", "Timeout", "End Period", "Fumble Recovery (Opponent)", "Field Goal Missed", "Field Goal Good", "End of Half", "Blocked Punt", "Blocked Field Goal", "Kickoff Return Touchdown", "Missed Field Goal Return", "Safety", "Uncategorized"]
 #Sort through teams in specific week
 for team in teams:
     PassSuccess = 0
@@ -49,45 +62,47 @@ for team in teams:
     for index, row in df.iterrows():
         #Skip when team is not on offense
         if row['offense'] != team:
-            continue;
+            continue
         #Skip if any of the following plays
-        elif row['play_type'] == "Kickoff" or row['play_type'] == "Punt" or row['play_type'] == "Penalty" or row['play_type'] == "Timeout" or row['play_type'] == "End Period":
-            continue;
+        elif row['play_type'] in toSkip:
+            continue
+        #Calculate Points Per Play
+        tempPPP = 0
+        if row['yard_line']+row['yards_gained'] > 100:
+            tempPPP = d[100] - d[row['yard_line']]
+        elif row['yard_line']+row['yards_gained'] == 0:
+            tempPPP = 0
+        else:
+            tempPPP = d[row['yard_line']+row['yards_gained']] - d[row['yard_line']]
+        PPP += tempPPP
         #Rushing logic for success rate
-        elif row['play_type'] == "Rush" and row['offense'] == team:
-            if row['distance'] - row['yards_gained'] <= 5 and row['down'] == 1:
-                RushSuccess += 1
-                RushTotal += 1
-                PPP += d[row['yard_line']+row['yards_gained']] - d[row['yard_line']]
-            elif row['distance'] - row['yards_gained'] <= 3 and row['down'] == 2:
-                RushSuccess += 1
-                RushTotal += 1
-                PPP += d[row['yard_line']+row['yards_gained']] - d[row['yard_line']]
-            elif row['distance'] - row['yards_gained'] <= 0 and (row['down'] == 3 or row['down'] == 4):
-                RushSuccess += 1
-                RushTotal += 1
-                PPP += d[row['yard_line']+row['yards_gained']] - d[row['yard_line']]
-            else:
-                RushTotal += 1
-        #Punish rushing game for sacks
-        elif row['play_type'] == "Sack":
+        if row['play_type'] == "Rush":
             RushTotal += 1
+            if (row['distance'] - row['yards_gained'] <= 5 and row['down'] == 1) or (row['distance'] - row['yards_gained'] <= 3 and row['down'] == 2) or (row['distance'] - row['yards_gained'] <= 0 and (row['down'] == 3 or row['down'] == 4)):
+                RushSuccess += 1
+        #Punish rushing game for sacks and fumbles
+        elif row['play_type'] == "Fumble Recovery (Own)" or row['play_type'] == "Sack":
+            RushTotal += 1
+        #Passing logic for success rate
+        elif row['play_type'] == "Pass Reception":
+            PassTotal += 1
+            if (row['distance'] - row['yards_gained'] <= 5 and row['down'] == 1) or (row['distance'] - row['yards_gained'] <= 3 and row['down'] == 2) or (row['distance'] - row['yards_gained'] <= 0 and (row['down'] == 3 or row['down'] == 4)):
+                PassSuccess += 1
+        #Punish incompletions and interceptions
+        elif row['play_type'] == "Pass Interception Return" or row['play_type'] == "Interception Return Touchdown" or row['play_type'] == "Pass Incompletion":
+            PassTotal += 1
         #Reward touchdowns
         elif row['play_type'] == "Rushing Touchdown":
-            RushSuccess += 1
             RushTotal += 1
-            PPP += d[row['yard_line']+row['yards_gained']] - d[row['yard_line']]
-        elif row['play_type'] == "Pass Reception" or row['play_type'] == "Passing Touchdown":
+            RushSuccess += 1
+        elif row['play_type'] == "Passing Touchdown":
+            PassTotal += 1
             PassSuccess += 1
-            PassTotal += 1
-            PPP += d[row['yard_line']+row['yards_gained']] - d[row['yard_line']]
-        #Punish incompletions
-        elif row['play_type'] == "Pass Incompletion":
-            PassTotal += 1
         else:
             continue;
 
     print("FINAL " + team + " RUSH SUCCESS RATE: " + str((RushSuccess/RushTotal)*100) + "%")
+    print("Pass Total: " + str(PassTotal) + "\nPass Success: " + str(PassSuccess))
     print("FINAL "  + team + " PASS SUCCESS RATE: " + str((PassSuccess/PassTotal)*100) + "%")
     print("TOTAL " + team + " SUCCESS RATE: " + str(((RushSuccess+PassSuccess)/(RushTotal+PassTotal))*100) + "%")
     print("FINAL " + team + " PPP: " + str(PPP/(RushTotal+PassTotal)))
