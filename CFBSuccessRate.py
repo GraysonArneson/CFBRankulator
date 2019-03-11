@@ -15,7 +15,7 @@ d = {
 #Call API for week 6 Florida game
 weeks = ["6"]
 # weeks = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
-teams = ["Alabama"]
+teams = ["Florida", "Miami", "Georgia", "NC State"]
 # teams = ["Florida", "LSU", "Florida State", "Alabama"]
 # SEC = ["Florida", "LSU", "Texas A&M", "Alabama", "Arkansas", "Auburn", "Georgia", "Kentucky", "Mississippi State", "Missouri", "Ole Miss", "South Carolina", "Tennessee", "Vanderbilt"]
 # ACC = ["Florida State", "Boston College", "Clemson", "Duke", "Georgia Tech", "Louisville", "Miami", "NC State", "Pittsburgh", "Syracuse", "Virginia", "Virginia Tech", "Wake Forest"]
@@ -31,7 +31,7 @@ teams = ["Alabama"]
 #Make API call
 
 weekNum = [6, 6, 6, 6]
-teamName = ["Florida", "Miami", "Georgia", "NC State"]
+teamName = teams
 numRush = []
 succRush = []
 numPass = []
@@ -107,6 +107,19 @@ for team in teams:
     print("TOTAL " + team + " SUCCESS RATE: " + str(((RushSuccess+PassSuccess)/(RushTotal+PassTotal))*100) + "%")
     print("FINAL " + team + " PPP: " + str(PPP/(RushTotal+PassTotal)))
     print("---------------------------------------------------------------------------------------")
+    Pct1 = (((RushSuccess+PassSuccess)/(RushTotal+PassTotal))*100)
+    totalPlays = RushTotal + PassTotal
+    toAppend = PPP/totalPlays
+    numRush.append(RushTotal)
+    succRush.append(RushSuccess)
+    numPass.append(PassTotal)
+    succPass.append(PassSuccess)
+    succPct.append(Pct1)
+    numPlays.append(totalPlays)
+    PointsPerPlay.append(toAppend)
 
 #Convert dataframe to csv
-df.to_csv('results.csv')
+list_of_tuples = list(zip(weekNum, teamName, numRush, succRush, numPass, succPass, succPct, numPlays, PointsPerPlay))
+df2 = pd.DataFrame(list_of_tuples, columns = ['weekNum', 'teamName', 'numRush', 'succRush', 'numPass', 'succPass', 'succPct', 'numPlays', 'PointsPerPlay'])
+df2.to_csv('testCombine.csv', index=False)
+df.to_csv('raw_results.csv')

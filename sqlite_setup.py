@@ -2,8 +2,8 @@ import sqlite3
 import pandas as pd
 
 #In memory db ':memory:; lives in RAM; useful for testing b/c fresh start each time
-#connection = sqlite3.connect('rankulator.db')
-connection = sqlite3.connect(':memory:')
+connection = sqlite3.connect('rankulator.db')
+#connection = sqlite3.connect(':memory:')
 
 c = connection.cursor()
 
@@ -33,7 +33,7 @@ def insert_team_data(csvfile):
 
 def get_team_by_name(team_name):
     # No Context manager b/c select doesn't need to be commited
-    c.execute("SELECT * FROM stats WHERE team=:team", {'team': team_name})
+    c.execute("SELECT * FROM stats WHERE teamName=:team", {'team': team_name})
     return c.fetchall()
 
 # Hard coded
@@ -53,7 +53,7 @@ def get_team_by_name(team_name):
 #finishes transaction
 #connection.commit()
 
-insert_team_data('test.csv')
+insert_team_data('testCombine.csv')
 out = get_team_by_name('Florida')
 print(out)
 
