@@ -7,11 +7,18 @@ connection = sqlite3.connect(':memory:')
 
 c = connection.cursor()
 
-#3 quotes allow for multiline stuff
+# 3 quotes allow for multiline stuff
+# Week(weekNum, team, numRush, succRush, numPass, succPass, succPct, numPlays, PPP)
 c.execute("""CREATE TABLE stats (
-             team text,
-             week integer,
-             num_plays integer
+             weekNum integer,
+             teamName text,
+             numRush integer,
+             succRush real,
+             numPass integer,
+             succPass real,
+             succPct real,
+             numPlays integer,
+             PointsPerPlay real
              )""")
 
 #functions for application integration
