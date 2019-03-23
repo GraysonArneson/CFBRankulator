@@ -2,8 +2,8 @@ import sqlite3
 import pandas as pd
 
 #In memory db ':memory:; lives in RAM; useful for testing b/c fresh start each time
-#connection = sqlite3.connect('rankulator.db')
-connection = sqlite3.connect(':memory:')
+connection = sqlite3.connect('rankulator.db')
+#connection = sqlite3.connect(':memory:')
 
 c = connection.cursor()
 
@@ -13,9 +13,9 @@ c.execute("""CREATE TABLE stats (
              weekNum integer,
              teamName text,
              numRush integer,
-             succRush real,
+             succRush integer,
              numPass integer,
-             succPass real,
+             succPass integer,
              succPct real,
              numPlays integer,
              PointsPerPlay real
@@ -33,7 +33,7 @@ def insert_team_data(csvfile):
 
 def get_team_by_name(team_name):
     # No Context manager b/c select doesn't need to be commited
-    c.execute("SELECT * FROM stats WHERE team=:team", {'team': team_name})
+    c.execute("SELECT * FROM stats WHERE teamName=:team", {'team': team_name})
     return c.fetchall()
 
 # Hard coded
@@ -53,8 +53,26 @@ def get_team_by_name(team_name):
 #finishes transaction
 #connection.commit()
 
+#insert_team_data('testCombine.csv')
 insert_team_data('test.csv')
-out = get_team_by_name('Florida')
+
+c.execute("""CREATE TABLE team (
+             name text,
+             AVGsuccPct real,
+             AVG_PPP real,
+             Score real
+             )""")
+
+c.execute("""INSERT INTO team
+             SELECT teamName, avg(succPCT), avg(PointsPerPlay), (avg(succPCT)+(100*avg(PointsPerPlay)))
+             FROM stats
+             GROUP BY teamName;
+            """)
+
+out = c.fetchall()
+
+
+#out = get_team_by_name('Florida')
 print(out)
 
 connection.close()
@@ -62,3 +80,5 @@ connection.close()
 # This may be useful later
 #df = pandas.read_csv(csvfile)
 #df.to_sql(table_name, conn, if_exists='append', index=False)
+
+#Possibly create a trigger to insert data into team when stats is updated/inserted into
