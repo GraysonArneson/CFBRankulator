@@ -1,6 +1,6 @@
 import json, requests
 import pandas as pd
-#Home scores at the 100, starts AT WORST at the 1
+#Home scores at the 100, starts AT WORST at the 1. Inverse for away teams, dealt with below
 d = {
   1 : 0.742, 2 : 0.797, 3 : 0.806, 4 : 0.827, 5 : 0.842, 6 : 0.853, 7 : 0.866, 8 : 0.877, 9 : 0.899, 10 : 0.908, 11 : 0.910, 12 : 0.914, 13 : 0.932, 14 : 0.942,
   15 : 0.951, 16 : 0.991, 17 : 1.062, 18 : 1.141, 19 : 1.176, 20 : 1.179, 21 : 1.186, 22 : 1.188, 23 : 1.192, 24 : 1.233, 25 : 1.243,
@@ -15,14 +15,24 @@ d = {
 #Call API for week 6 Florida game
 weeks = ["6"]
 # weeks = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]
-teams = ["Florida", "Miami", "Georgia", "NC State", "Arkansas", "Mississippi State", "Texas A&M", "South Carolina", "Ole Miss"]
+# teams = ["Florida", "Miami", "Georgia", "NC State", "Arkansas", "Mississippi State", "Texas A&M", "South Carolina", "Ole Miss"]
 # teams = ["Florida", "LSU", "Florida State", "Alabama"]
-# SEC = ["Florida", "LSU", "Texas A&M", "Alabama", "Arkansas", "Auburn", "Georgia", "Kentucky", "Mississippi State", "Missouri", "Ole Miss", "South Carolina", "Tennessee", "Vanderbilt"]
-# ACC = ["Florida State", "Boston College", "Clemson", "Duke", "Georgia Tech", "Louisville", "Miami", "NC State", "Pittsburgh", "Syracuse", "Virginia", "Virginia Tech", "Wake Forest"]
-# PAC = ["Arizona", "Arizona State", "California", "Colorado", "Oregon", "Oregon State", "Stanford", "UCLA", "USC", "Utah", "Washington", "Washington State"]
-# B1G = ["Illinois", "Indiana", "Iowa", "Maryland", "Michigan", "Michigan State", "Minnesota", "Nebraska", "Northwestern", "Ohio State", "Penn State", "Purdue", "Rutgers", "Wisconsin"]
-# B12 = ["Baylor", "Iowa State", "Kansas", "Kansas State", "Oklahoma", "Oklahoma State", "TCU", "Texas", "Texas Tech", "West Virginia"]
-# teams = SEC
+# teams = ["Florida", "LSU"]
+#SEC = ["Florida"]
+
+home = []
+SEC = ["Florida", "LSU", "Texas A&M", "Alabama", "Arkansas", "Auburn", "Georgia", "Kentucky", "Mississippi State", "Missouri", "Ole Miss", "South Carolina", "Tennessee", "Vanderbilt"]
+ACC = ["Florida State", "Boston College", "Clemson", "Duke", "Georgia Tech", "Louisville", "Miami", "NC State", "Pittsburgh", "Syracuse", "North Carolina", "Virginia", "Virginia Tech", "Wake Forest", "Notre Dame"]
+PAC = ["Arizona", "Arizona State", "California", "Colorado", "Oregon", "Oregon State", "Stanford", "UCLA", "USC", "Utah", "Washington", "Washington State"]
+B1G = ["Illinois", "Indiana", "Iowa", "Maryland", "Michigan", "Michigan State", "Minnesota", "Nebraska", "Northwestern", "Ohio State", "Penn State", "Purdue", "Rutgers", "Wisconsin"]
+B12 = ["Baylor", "Iowa State", "Kansas", "Kansas State", "Oklahoma", "Oklahoma State", "TCU", "Texas", "Texas Tech", "West Virginia"]
+teams = SEC
+allP5 = []
+allP5.extend(SEC)
+allP5.extend(ACC)
+allP5.extend(PAC)
+allP5.extend(B1G)
+allP5.extend(B12)
 # teams.extend(ACC)
 # teams.extend(PAC)
 # teams.extend(B1G)
@@ -30,8 +40,8 @@ teams = ["Florida", "Miami", "Georgia", "NC State", "Arkansas", "Mississippi Sta
 
 #Make API call
 
-weekNum = [6, 6, 6, 6, 6, 6, 6, 6, 6]
-teamName = teams
+weekNum = []
+teamName = []
 numRush = []
 succRush = []
 numPass = []
@@ -40,7 +50,11 @@ succPct = []
 numPlays = []
 PointsPerPlay = []
 
-response = requests.get("https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=6")
+week = 13
+toGet = "https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=" + str(week)
+
+# response = requests.get("https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=5")
+response = requests.get(toGet)
 
 #Check for appropriate response code
 print("Received status code: " + str(response.status_code))
@@ -49,9 +63,21 @@ print("Expected status code: 200")
 #Create dataframe
 df = pd.read_json(response.content)
 df.sort_values(by=['period'])
+df.to_csv('raw_results.csv')
 
 
 toSkip = ["Kickoff", "Punt", "Penalty", "Timeout", "End Period", "Fumble Recovery (Opponent)", "Field Goal Missed", "Field Goal Good", "End of Half", "Blocked Punt", "Blocked Field Goal", "Kickoff Return Touchdown", "Missed Field Goal Return", "Safety", "Uncategorized"]
+
+# for index, row in df.iterrows():
+#     if(row['play_type'] == "Kickoff"):
+#         if(row['yard_line'] == 35):
+#             #home.insert('1', teams.index(team))
+#             home.append('1')
+#         elif(row['yard_line'] == 65):
+#             #home.insert('0', teams.index(team))
+#             home.append('0')
+#         else
+#             continue
 #Sort through teams in specific week
 for team in teams:
     PassSuccess = 0
@@ -59,8 +85,35 @@ for team in teams:
     RushSuccess = 0
     RushTotal = 0
     PPP = 0
+    homeT = False
+    checkSkip = False
+    #Figure out away vs home team
     for index, row in df.iterrows():
-        #Skip garbage time scores
+        #Check if non-P5 opponent
+        if row['defense'] not in allP5 and (row['offense'] == team):
+            print(team + " played a non-P5 opponent this week")
+            checkSkip = True
+            break
+        if(row['play_type'] == "Kickoff") and (row['offense'] == team):
+            if(row['yard_line'] == 35):
+                #home.insert('1', teams.index(team))
+                homeT = True
+                break
+            elif(row['yard_line'] == 65) and (row['offense'] == team):
+                #home.insert('0', teams.index(team))
+                break
+            else:
+                continue
+    for index, row in df.iterrows():
+        #Skip calculations if going to skip later
+        if checkSkip == True:
+            break
+        #Get yardline for home vs away
+        if homeT == True:
+            var_yardline = row['yard_line']
+        else:
+            var_yardline = 100-row['yard_line']
+        #Eliminate garbage time scores
         if row['period'] == 2 and abs(row['defense_score'] - row['offense_score']) >= 38:
             continue
         if row['period'] == 3 and abs(row['defense_score'] - row['offense_score']) >= 28:
@@ -73,14 +126,17 @@ for team in teams:
         #Skip if any of the following plays
         elif row['play_type'] in toSkip:
             continue
+
         #Calculate Points Per Play
         tempPPP = 0
-        if row['yard_line']+row['yards_gained'] > 100:
-            tempPPP = d[100] - d[row['yard_line']]
-        elif row['yard_line']+row['yards_gained'] == 0 or row['yard_line'] == 0:
+        if var_yardline + row['yards_gained'] > 100:
+            tempPPP = d[100] - d[var_yardline]
+        elif var_yardline + row['yards_gained'] < 0:
+            tempPPP = d[1] - d[var_yardline]
+        elif (var_yardline + row['yards_gained'] == 0) or var_yardline == 0 or var_yardline == 100:
             tempPPP = 0
         else:
-            tempPPP = d[row['yard_line']+row['yards_gained']] - d[row['yard_line']]
+            tempPPP = d[var_yardline + row['yards_gained']] - d[var_yardline]
         PPP += tempPPP
         #Rushing logic for success rate
         if row['play_type'] == "Rush":
@@ -111,6 +167,13 @@ for team in teams:
     # passing success rate (psr)
     # succ rate(sr)
     # final points per play (fppp)
+    if RushTotal == 0 and PassTotal == 0:
+        print(team + " didn't play this week")
+        continue
+    elif checkSkip == True:
+        continue
+    teamName.append(team)
+    weekNum.append(week)
     rsr = str((RushSuccess/RushTotal)*100)
     psr = str((PassSuccess/PassTotal)*100)
     sr = str(((RushSuccess+PassSuccess)/(RushTotal+PassTotal))*100)
@@ -136,8 +199,16 @@ for team in teams:
     succPct.append(Pct1)
     numPlays.append(totalPlays)
     PointsPerPlay.append(toAppend)
+    if homeT == True:
+        home.append('1')
+    else:
+        home.append('0')
 
 #Convert dataframe to csv
+print(teamName)
+print(weekNum)
+print(numRush)
+print(succRush)
 list_of_tuples = list(zip(weekNum, teamName, numRush, succRush, numPass, succPass, succPct, numPlays, PointsPerPlay))
 df2 = pd.DataFrame(list_of_tuples, columns = ['weekNum', 'teamName', 'numRush', 'succRush', 'numPass', 'succPass', 'succPct', 'numPlays', 'PointsPerPlay'])
 df2.to_csv('testCombine.csv', index=False)
