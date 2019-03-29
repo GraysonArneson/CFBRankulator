@@ -1,3 +1,5 @@
 rankulator.db
 results.csv
 raw_results.csv
+pythonDBnotes.py
+__pycache__
