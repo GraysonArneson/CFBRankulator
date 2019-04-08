@@ -20,7 +20,9 @@ c.execute("""CREATE TABLE stats (
              succPass integer,
              succPct real,
              numPlays integer,
-             PointsPerPlay real
+             PointsPerPlay real,
+             defSucc real,
+             defPointsPerPlay real
              )""")
 
 RL.insert_table_data('testCombine.csv', connection, 'stats')
@@ -31,6 +33,9 @@ c.execute("""CREATE TABLE team (
              AVGsuccPct real,
              AVG_PPP real,
              Score real,
+             AVGdefSuccPct real,
+             AVG_DefPPP real,
+             DefScore real,
              SOS real DEFAULT 1,
              Adjusted_Score real DEFAULT NULL
              )""")

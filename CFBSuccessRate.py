@@ -49,8 +49,10 @@ succPass = []
 succPct = []
 numPlays = []
 PointsPerPlay = []
+defSucc = []
+defPointsPerPlay = []
 
-week = 13
+week = 6
 toGet = "https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=" + str(week)
 
 # response = requests.get("https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=5")
@@ -84,16 +86,21 @@ for team in teams:
     PassTotal = 0
     RushSuccess = 0
     RushTotal = 0
+    DefRushSuccess = 0
+    DefRushTotal = 0
+    DefPassSuccess = 0
+    DefPassTotal = 0
     PPP = 0
+    DefPPP = 0
     homeT = False
-    checkSkip = False
+#    checkSkip = False
     #Figure out away vs home team
     for index, row in df.iterrows():
         #Check if non-P5 opponent
-        if row['defense'] not in allP5 and (row['offense'] == team):
-            print(team + " played a non-P5 opponent this week")
-            checkSkip = True
-            break
+#        if row['defense'] not in allP5 and (row['offense'] == team):
+#            print(team + " played a non-P5 opponent this week")
+#            checkSkip = True
+#            break
         if(row['play_type'] == "Kickoff") and (row['offense'] == team):
             if(row['yard_line'] == 35):
                 #home.insert('1', teams.index(team))
@@ -104,10 +111,70 @@ for team in teams:
                 break
             else:
                 continue
+
+
+    #For Defense
+    for index, row in df.iterrows():
+        #Get yardline for home vs away
+        if homeT == True:
+            var_yardline = 100-row['yard_line']
+        else:
+            var_yardline = row['yard_line']
+        #Eliminate garbage time scores
+        if row['period'] == 2 and abs(row['defense_score'] - row['offense_score']) >= 38:
+            continue
+        if row['period'] == 3 and abs(row['defense_score'] - row['offense_score']) >= 28:
+            continue
+        if row['period'] == 4 and abs(row['defense_score'] - row['offense_score']) >= 22:
+            continue
+        #Skip when team is not on defense
+        if row['defense'] != team:
+            continue
+        #Skip Following plays
+        elif row['play_type'] in toSkip:
+            continue
+        #Calculate def PPP
+        TempDefPPP = 0
+        if var_yardline + row['yards_gained'] > 100:
+            TempDefPPP = d[100] - d[var_yardline]
+        elif var_yardline + row['yards_gained'] < 0:
+            TempDefPPP = d[1] - d[var_yardline]
+        elif (var_yardline + row['yards_gained'] == 0) or var_yardline == 0 or var_yardline == 100:
+            TempDefPPP = 0
+        else:
+            TempDefPPP = d[var_yardline + row['yards_gained']] - d[var_yardline]
+        DefPPP += TempDefPPP
+        #Get Totals
+        if row['play_type'] == "Rush":
+            DefRushTotal += 1
+            if (row['distance'] - row['yards_gained'] <= 5 and row['down'] == 1) or (row['distance'] - row['yards_gained'] <= 3 and row['down'] == 2) or (row['distance'] - row['yards_gained'] <= 0 and (row['down'] == 3 or row['down'] == 4)):
+                DefRushSuccess += 1
+        #Punish rushing game for sacks and fumbles
+        elif row['play_type'] == "Fumble Recovery (Own)" or row['play_type'] == "Sack":
+            DefRushTotal += 1
+        #Passing logic for success rate
+        elif row['play_type'] == "Pass Reception":
+            DefPassTotal += 1
+            if (row['distance'] - row['yards_gained'] <= 5 and row['down'] == 1) or (row['distance'] - row['yards_gained'] <= 3 and row['down'] == 2) or (row['distance'] - row['yards_gained'] <= 0 and (row['down'] == 3 or row['down'] == 4)):
+                DefPassSuccess += 1
+        #Punish incompletions and interceptions
+        elif row['play_type'] == "Pass Interception Return" or row['play_type'] == "Interception Return Touchdown" or row['play_type'] == "Pass Incompletion":
+            DefPassTotal += 1
+        #Reward touchdowns
+        elif row['play_type'] == "Rushing Touchdown":
+            DefRushTotal += 1
+            DefRushSuccess += 1
+        elif row['play_type'] == "Passing Touchdown":
+            DefPassTotal += 1
+            DefPassSuccess += 1
+        else:
+            continue;
+
+    #For Offense
     for index, row in df.iterrows():
         #Skip calculations if going to skip later
-        if checkSkip == True:
-            break
+        #if checkSkip == True:
+        #    break
         #Get yardline for home vs away
         if homeT == True:
             var_yardline = row['yard_line']
@@ -170,28 +237,40 @@ for team in teams:
     if RushTotal == 0 and PassTotal == 0:
         print(team + " didn't play this week")
         continue
-    elif checkSkip == True:
-        continue
+    #elif checkSkip == True:
+    #    continue
     teamName.append(team)
     weekNum.append(week)
+    #Offensive Calculations
     rsr = str((RushSuccess/RushTotal)*100)
     psr = str((PassSuccess/PassTotal)*100)
     sr = str(((RushSuccess+PassSuccess)/(RushTotal+PassTotal))*100)
     fppp = str(PPP/(RushTotal+PassTotal)*100)
+    #Defensive Calculations
+    fdppp = str(DefPPP/(DefRushTotal+DefPassTotal)*100)
+    dsr = str(100-(((DefRushSuccess+DefPassSuccess)/(DefRushTotal+DefPassTotal))*100))
 
     score = float(fppp) + float(sr)
+    defScore = float(dsr) - float(fdppp)
 
     print("FINAL " + team + " RUSH SUCCESS RATE: " + rsr + "%")
-    print("Pass Total: " + str(PassTotal) + "\nPass Success: " + str(PassSuccess))
     print("FINAL "  + team + " PASS SUCCESS RATE: " + psr + "%")
     print("TOTAL " + team + " SUCCESS RATE: " + sr + "%")
     print("FINAL " + team + " PPP: " + str(PPP/(RushTotal+PassTotal)))
     print("TEAM SCORE FOR OFFENSE: " + str(score))
     print("")
+    print("----------DEFENSIVE STATISTICS----------")
+    print("TOTAL " + team + " DEFENSIVE SUCCESS RATE: " + dsr + "%")
+    print("TOTAL " + team + " DEFENSIVE PPP: " + str(DefPPP/(DefRushTotal+DefPassTotal)))
+    print("TEAM SCORE FOR DEFENSE (LOWER IS BETTER): " + str(defScore))
+    print("")
     print("---------------------------------------------------------------------------------------")
     Pct1 = (((RushSuccess+PassSuccess)/(RushTotal+PassTotal))*100)
     totalPlays = RushTotal + PassTotal
     toAppend = PPP/totalPlays
+    Dpct = (DefPPP/(DefRushTotal+DefPassTotal)*100)
+    defTotalPlays = DefRushTotal+DefPassTotal
+    defToAppend = DefPPP/defTotalPlays
     numRush.append(RushTotal)
     succRush.append(RushSuccess)
     numPass.append(PassTotal)
@@ -199,6 +278,8 @@ for team in teams:
     succPct.append(Pct1)
     numPlays.append(totalPlays)
     PointsPerPlay.append(toAppend)
+    defSucc.append(Dpct)
+    defPointsPerPlay.append(defToAppend)
     if homeT == True:
         home.append('1')
     else:
@@ -207,10 +288,10 @@ for team in teams:
 #Convert dataframe to csv
 print(teamName)
 print(weekNum)
-print(numRush)
-print(succRush)
-list_of_tuples = list(zip(weekNum, teamName, numRush, succRush, numPass, succPass, succPct, numPlays, PointsPerPlay))
-df2 = pd.DataFrame(list_of_tuples, columns = ['weekNum', 'teamName', 'numRush', 'succRush', 'numPass', 'succPass', 'succPct', 'numPlays', 'PointsPerPlay'])
+#print()
+#print()
+list_of_tuples = list(zip(weekNum, teamName, numRush, succRush, numPass, succPass, succPct, numPlays, PointsPerPlay, defSucc, defPointsPerPlay))
+df2 = pd.DataFrame(list_of_tuples, columns = ['weekNum', 'teamName', 'numRush', 'succRush', 'numPass', 'succPass', 'succPct', 'numPlays', 'PointsPerPlay', 'defSucc', 'defPointsPerPlay'])
 df2.to_csv('testCombine.csv', index=False)
 #df2.to_csv("test.csv", if_exists='append', index=False)
 df.to_csv('raw_results.csv')
