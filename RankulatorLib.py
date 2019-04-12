@@ -27,12 +27,12 @@ def update_team_table(connection, cursor):
                                                         WHERE teamName=:nameVar),
                                     AVG_DefPPP = (SELECT avg(defPointsPerPlay)
                                                         FROM stats
-                                                        WHERE teamName=:nameVar),
+                                                        WHERE teamName=:nameVar)
                                 WHERE name=:nameVar
                                 """, {'nameVar' : nameVar})
         cursor.execute("UPDATE team SET Score = AVGsuccPct+(100*AVG_PPP)")
-        cursor.execute("UPDATE team SET DefScore = AVGdefSuccPct+(100*AVG_DefPPP)")
-        cursor.execute("UPDATE team SET Adjusted_Score = Score*SOS")
+        cursor.execute("UPDATE team SET DefScore = (100-AVGdefSuccPct)+(100*AVG_DefPPP)")
+        cursor.execute("UPDATE team SET Adjusted_Score = (Score*SOS)-(DefScore/SOS)")
 
 def update_SOS(connection, cursor):
     with connection:

@@ -27,6 +27,11 @@ PAC = ["Arizona", "Arizona State", "California", "Colorado", "Oregon", "Oregon S
 B1G = ["Illinois", "Indiana", "Iowa", "Maryland", "Michigan", "Michigan State", "Minnesota", "Nebraska", "Northwestern", "Ohio State", "Penn State", "Purdue", "Rutgers", "Wisconsin"]
 B12 = ["Baylor", "Iowa State", "Kansas", "Kansas State", "Oklahoma", "Oklahoma State", "TCU", "Texas", "Texas Tech", "West Virginia"]
 teams = SEC
+#teams.extend(ACC)
+#teams.extend(PAC)
+#teams.extend(B1G)
+#teams.extend(B12)
+
 allP5 = []
 allP5.extend(SEC)
 allP5.extend(ACC)
@@ -52,7 +57,7 @@ PointsPerPlay = []
 defSucc = []
 defPointsPerPlay = []
 
-week = 6
+week = 13
 toGet = "https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=" + str(week)
 
 # response = requests.get("https://api.collegefootballdata.com/plays?seasonType=regular&year=2018&week=5")
@@ -251,8 +256,10 @@ for team in teams:
     dsr = str(100-(((DefRushSuccess+DefPassSuccess)/(DefRushTotal+DefPassTotal))*100))
 
     score = float(fppp) + float(sr)
-    defScore = float(dsr) - float(fdppp)
+    defScore = (100-float(dsr)) + float(fdppp)
+    #float(fppp) + float(sr) - float(dsr) + float(fdppp)
 
+    print("----------OFFENSIVE STATISTICS----------")
     print("FINAL " + team + " RUSH SUCCESS RATE: " + rsr + "%")
     print("FINAL "  + team + " PASS SUCCESS RATE: " + psr + "%")
     print("TOTAL " + team + " SUCCESS RATE: " + sr + "%")
@@ -260,15 +267,18 @@ for team in teams:
     print("TEAM SCORE FOR OFFENSE: " + str(score))
     print("")
     print("----------DEFENSIVE STATISTICS----------")
+    print(team+ " Defense rushh succ "+ str(DefRushSuccess))
+    print(team+ " Defense pass succ "+ str(DefPassSuccess))
     print("TOTAL " + team + " DEFENSIVE SUCCESS RATE: " + dsr + "%")
     print("TOTAL " + team + " DEFENSIVE PPP: " + str(DefPPP/(DefRushTotal+DefPassTotal)))
     print("TEAM SCORE FOR DEFENSE (LOWER IS BETTER): " + str(defScore))
     print("")
     print("---------------------------------------------------------------------------------------")
+    print("Final Score: "+ str(score-defScore))
     Pct1 = (((RushSuccess+PassSuccess)/(RushTotal+PassTotal))*100)
     totalPlays = RushTotal + PassTotal
     toAppend = PPP/totalPlays
-    Dpct = (DefPPP/(DefRushTotal+DefPassTotal)*100)
+    Dpct = float(dsr)
     defTotalPlays = DefRushTotal+DefPassTotal
     defToAppend = DefPPP/defTotalPlays
     numRush.append(RushTotal)

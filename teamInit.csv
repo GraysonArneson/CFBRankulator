@@ -1,66 +1,66 @@
-name,AVGsuccPct,AVG_PPP,Score,SOS,Adjusted_Score
-Florida,0,0,0,0,0
-LSU,0,0,0,0,0
-Texas A&M,0,0,0,0,0
-Alabama,0,0,0,0,0
-Arkansas,0,0,0,0,0
-Auburn,0,0,0,0,0
-Georgia,0,0,0,0,0
-Kentucky,0,0,0,0,0
-Mississippi State,0,0,0,0,0
-Missouri,0,0,0,0,0
-Ole Miss,0,0,0,0,0
-South Carolina,0,0,0,0,0
-Tennessee,0,0,0,0,0
-Vanderbilt,0,0,0,0,0
-Florida State,0,0,0,0,0
-Boston College,0,0,0,0,0
-Clemson,0,0,0,0,0
-Duke,0,0,0,0,0
-Georgia Tech,0,0,0,0,0
-Louisville,0,0,0,0,0
-Miami,0,0,0,0,0
-NC State,0,0,0,0,0
-Pittsburgh,0,0,0,0,0
-Syracuse,0,0,0,0,0
-North Carolina,0,0,0,0,0
-Virginia,0,0,0,0,0
-Virginia Tech,0,0,0,0,0
-Wake Forest,0,0,0,0,0
-Notre Dame,0,0,0,0,0
-Arizona,0,0,0,0,0
-Arizona State,0,0,0,0,0
-California,0,0,0,0,0
-Colorado,0,0,0,0,0
-Oregon,0,0,0,0,0
-Oregon State,0,0,0,0,0
-Stanford,0,0,0,0,0
-UCLA,0,0,0,0,0
-USC,0,0,0,0,0
-Utah,0,0,0,0,0
-Washington,0,0,0,0,0
-Washington State,0,0,0,0,0
-Illinois,0,0,0,0,0
-Indiana,0,0,0,0,0
-Iowa,0,0,0,0,0
-Maryland,0,0,0,0,0
-Michigan,0,0,0,0,0
-Michigan State,0,0,0,0,0
-Minnesota,0,0,0,0,0
-Nebraska,0,0,0,0,0
-Northwestern,0,0,0,0,0
-Ohio State,0,0,0,0,0
-Penn State,0,0,0,0,0
-Purdue,0,0,0,0,0
-Rutgers,0,0,0,0,0
-Wisconsin,0,0,0,0,0
-Baylor,0,0,0,0,0
-Iowa State,0,0,0,0,0
-Kansas,0,0,0,0,0
-Kansas State,0,0,0,0,0
-Oklahoma,0,0,0,0,0
-Oklahoma State,0,0,0,0,0
-TCU,0,0,0,0,0
-Texas,0,0,0,0,0
-Texas Tech,0,0,0,0,0
-West Virginia,0,0,0,0,0
+name,AVGsuccPct,AVG_PPP,Score,AVGdefSuccPct,AVG_DefPPP,DefScore,SOS,Adjusted_Score
+Florida,0,0,0,0,0,0,0,0
+LSU,0,0,0,0,0,0,0,0
+Texas A&M,0,0,0,0,0,0,0,0
+Alabama,0,0,0,0,0,0,0,0
+Arkansas,0,0,0,0,0,0,0,0
+Auburn,0,0,0,0,0,0,0,0
+Georgia,0,0,0,0,0,0,0,0
+Kentucky,0,0,0,0,0,0,0,0
+Mississippi State,0,0,0,0,0,0,0,0
+Missouri,0,0,0,0,0,0,0,0
+Ole Miss,0,0,0,0,0,0,0,0
+South Carolina,0,0,0,0,0,0,0,0
+Tennessee,0,0,0,0,0,0,0,0
+Vanderbilt,0,0,0,0,0,0,0,0
+Florida State,0,0,0,0,0,0,0,0
+Boston College,0,0,0,0,0,0,0,0
+Clemson,0,0,0,0,0,0,0,0
+Duke,0,0,0,0,0,0,0,0
+Georgia Tech,0,0,0,0,0,0,0,0
+Louisville,0,0,0,0,0,0,0,0
+Miami,0,0,0,0,0,0,0,0
+NC State,0,0,0,0,0,0,0,0
+Pittsburgh,0,0,0,0,0,0,0,0
+Syracuse,0,0,0,0,0,0,0,0
+North Carolina,0,0,0,0,0,0,0,0
+Virginia,0,0,0,0,0,0,0,0
+Virginia Tech,0,0,0,0,0,0,0,0
+Wake Forest,0,0,0,0,0,0,0,0
+Notre Dame,0,0,0,0,0,0,0,0
+Arizona,0,0,0,0,0,0,0,0
+Arizona State,0,0,0,0,0,0,0,0
+California,0,0,0,0,0,0,0,0
+Colorado,0,0,0,0,0,0,0,0
+Oregon,0,0,0,0,0,0,0,0
+Oregon State,0,0,0,0,0,0,0,0
+Stanford,0,0,0,0,0,0,0,0
+UCLA,0,0,0,0,0,0,0,0
+USC,0,0,0,0,0,0,0,0
+Utah,0,0,0,0,0,0,0,0
+Washington,0,0,0,0,0,0,0,0
+Washington State,0,0,0,0,0,0,0,0
+Illinois,0,0,0,0,0,0,0,0
+Indiana,0,0,0,0,0,0,0,0
+Iowa,0,0,0,0,0,0,0,0
+Maryland,0,0,0,0,0,0,0,0
+Michigan,0,0,0,0,0,0,0,0
+Michigan State,0,0,0,0,0,0,0,0
+Minnesota,0,0,0,0,0,0,0,0
+Nebraska,0,0,0,0,0,0,0,0
+Northwestern,0,0,0,0,0,0,0,0
+Ohio State,0,0,0,0,0,0,0,0
+Penn State,0,0,0,0,0,0,0,0
+Purdue,0,0,0,0,0,0,0,0
+Rutgers,0,0,0,0,0,0,0,0
+Wisconsin,0,0,0,0,0,0,0,0
+Baylor,0,0,0,0,0,0,0,0
+Iowa State,0,0,0,0,0,0,0,0
+Kansas,0,0,0,0,0,0,0,0
+Kansas State,0,0,0,0,0,0,0,0
+Oklahoma,0,0,0,0,0,0,0,0
+Oklahoma State,0,0,0,0,0,0,0,0
+TCU,0,0,0,0,0,0,0,0
+Texas,0,0,0,0,0,0,0,0
+Texas Tech,0,0,0,0,0,0,0,0
+West Virginia,0,0,0,0,0,0,0,0
