@@ -38,10 +38,10 @@ allP5.extend(ACC)
 allP5.extend(PAC)
 allP5.extend(B1G)
 allP5.extend(B12)
-# teams.extend(ACC)
-# teams.extend(PAC)
-# teams.extend(B1G)
-# teams.extend(B12)
+teams.extend(ACC)
+teams.extend(PAC)
+teams.extend(B1G)
+teams.extend(B12)
 
 #Make API call
 
